@@ -1,8 +1,6 @@
-pip install chromadb sentence-transformers pythainlp langchain
-
 import chromadb
 from sentence_transformers import SentenceTransformer
-from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 model = SentenceTransformer("BAAI/bge-m3")
 client = chromadb.PersistentClient(path="./lab_db")
