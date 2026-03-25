@@ -15,7 +15,7 @@ from sentence_transformers import SentenceTransformer
 load_dotenv()
 
 EMBED_MODEL = "intfloat/multilingual-e5-large"
-LLM_MODEL = os.getenv("OLLAMA_MODEL", "llama3.1:8b")
+LLM_MODEL = os.getenv("OLLAMA_MODEL", "gpt-oss:20b")
 OLLAMA_BASE_URL = os.getenv("OLLAMA_BASE_URL", "http://localhost:11434")
 CHUNK_SIZE = 400
 CHUNK_OVERLAP = 40
