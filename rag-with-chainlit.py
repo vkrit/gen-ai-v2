@@ -51,6 +51,26 @@ class ThaiNaiveRAG:
             self._embedder = SentenceTransformer(EMBED_MODEL)
         return self._embedder
 
+    def chunk_thai(self, text: str, size: int = CHUNK_SIZE, overlap: int = CHUNK_OVERLAP) -> list[str]:
+        text = text.strip()
+        if not text:
+            return []
+
+        if len(text) <= size:
+            return [text]
+
+        chunks = []
+        step = max(1, size - overlap)
+        start = 0
+
+        while start < len(text):
+            chunk = text[start : start + size].strip()
+            if chunk:
+                chunks.append(chunk)
+            start += step
+
+        return chunks
+
     def retrieve(self, query: str, top_k: int = 5):
         if self._index is None:
             if INDEX_PATH.exists():
@@ -91,10 +111,50 @@ async def main(message: cl.Message):
     rag = cl.user_session.get("rag")
     settings = cl.user_session.get("settings")
 
-    # (Ingestion logic remains the same as previous response...)
+# --- 1. INCREMENTAL INGESTION ---
     if message.elements:
-        # Filter for supported files and handle ingestion (skipped here for brevity)
-        pass 
+        files = [el for el in message.elements if el.name.endswith(tuple(SUPPORTED_SUFFIXES))]
+        if files:
+            new_chunks = []
+            async with cl.Step(name="Processing Files") as root:
+                for file in files:
+                    suffix = Path(file.name).suffix.lower()
+                    try:
+                        if suffix == ".txt":
+                            with open(file.path, "r", encoding="utf-8") as f:
+                                text = f.read()
+                                chunks = rag.chunk_thai(text)
+                                new_chunks.extend(ChunkRecord(text=c, source=file.name) for c in chunks)
+                        elif suffix == ".pdf":
+                            from pypdf import PdfReader
+                            reader = PdfReader(file.path)
+                            # Process page by page for better referencing
+                            for i, page in enumerate(reader.pages):
+                                text = page.extract_text() or ""
+                                if text.strip():
+                                    chunks = rag.chunk_thai(text)
+                                    new_chunks.extend(ChunkRecord(text=c, source=file.name, page=str(i+1)) for c in chunks)
+                    except Exception as e:
+                        await cl.Message(content=f"❌ Error reading {file.name}: {e}").send()
+
+                if new_chunks:
+                    # Embedding Logic
+                    new_vecs = await cl.make_async(rag.embedder.encode)([c.text for c in new_chunks], normalize_embeddings=True)
+                    
+                    if INDEX_PATH.exists() and METADATA_PATH.exists():
+                        index = faiss.read_index(str(INDEX_PATH))
+                        all_meta = [ChunkRecord(**item) for item in json.loads(METADATA_PATH.read_text(encoding="utf-8"))]
+                        all_meta.extend(new_chunks)
+                    else:
+                        index = faiss.IndexFlatIP(new_vecs.shape[1])
+                        all_meta = new_chunks
+                    
+                    index.add(np.asarray(new_vecs, dtype="float32"))
+                    faiss.write_index(index, str(INDEX_PATH))
+                    METADATA_PATH.write_text(json.dumps([asdict(c) for c in all_meta], ensure_ascii=False), encoding="utf-8")
+                    rag._index, rag._metadata = index, all_meta
+                    await cl.Message(content=f"✅ เพิ่มข้อมูล {len(files)} ไฟล์เรียบร้อย (รวม {len(all_meta)} chunks)").send()
+            return
 
     # --- QUERY & REFERENCES ---
     results = rag.retrieve(message.content, top_k=settings["top_k"])
