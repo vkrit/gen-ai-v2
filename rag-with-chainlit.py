@@ -193,7 +193,7 @@ async def main(message: cl.Message):
                     token_count = chunk.usage.total_tokens
 
         elif provider == "Anthropic":
-            model_name = "claude-3-5-sonnet-20240620"
+            model_name = "claude-sonnet-4-5"
             client = AsyncAnthropic(api_key=os.getenv("ANTHROPIC_API_KEY"))
             async with client.messages.stream(
                 model=model_name, max_tokens=1024, system=system_prompt,
@@ -241,4 +241,5 @@ async def main(message: cl.Message):
         await cl.Message(content=f"Error: {e}").send()
     
     resp_msg.elements = source_elements
+
     await resp_msg.send()

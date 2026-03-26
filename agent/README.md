@@ -1,7 +1,5 @@
 # AI Agent Dashboard App
 
-This project turns the concepts from `agent_concepts_reference.docx` into a runnable demo app:
-
 - FastAPI backend
 - Browser dashboard
 - Orchestrator plus specialist agent routing
@@ -13,7 +11,6 @@ This project turns the concepts from `agent_concepts_reference.docx` into a runn
 ## Run
 
 ```bash
-cd "/Users/veerasakkritsanapraphan/Documents/New project"
 . .venv/bin/activate
 uv sync
 uvicorn app.main:app --reload
