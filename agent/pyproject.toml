@@ -1,0 +1,12 @@
+[project]
+name = "agent-dashboard-app"
+version = "0.1.0"
+description = "AI agent demo with a dashboard app inspired by the hospital agent reference architecture."
+requires-python = ">=3.11"
+dependencies = [
+  "fastapi>=0.115.0",
+  "uvicorn>=0.34.0",
+]
+
+[tool.uv]
+package = false

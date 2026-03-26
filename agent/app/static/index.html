@@ -1,0 +1,83 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>AI Agent Dashboard</title>
+    <link rel="icon" href="/static/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/static/styles.css" />
+  </head>
+  <body>
+    <div class="shell">
+      <aside class="sidebar">
+        <div class="brand">
+          <p class="eyebrow">Reference Architecture</p>
+          <h1>AI Agent Dashboard</h1>
+          <p class="muted">Tool use, approvals, memory, and audit visibility in one place.</p>
+        </div>
+
+        <section class="panel">
+          <label for="patient-select">Patient</label>
+          <select id="patient-select"></select>
+          <label for="nurse-id">Nurse ID</label>
+          <input id="nurse-id" value="nurse-demo" />
+          <button id="new-session" class="secondary">New Session</button>
+        </section>
+
+        <section class="panel">
+          <div class="section-header">
+            <h2>Pending Approvals</h2>
+            <span id="approval-count" class="badge">0</span>
+          </div>
+          <div id="approval-list" class="stack"></div>
+        </section>
+      </aside>
+
+      <main class="workspace">
+        <section class="chat-card">
+          <div class="section-header">
+            <div>
+              <p class="eyebrow">Clinical Assistant</p>
+              <h2>Session Chat</h2>
+            </div>
+            <code id="session-id"></code>
+          </div>
+          <div id="messages" class="messages"></div>
+          <form id="chat-form" class="composer">
+            <textarea
+              id="message-input"
+              placeholder="Ask about medications, appointments, or documentation..."
+              rows="4"
+            ></textarea>
+            <button type="submit">Run Agent</button>
+          </form>
+        </section>
+
+        <section class="detail-grid">
+          <div class="detail-card">
+            <div class="section-header">
+              <h2>Execution Trace</h2>
+            </div>
+            <div id="trace" class="stack"></div>
+          </div>
+
+          <div class="detail-card">
+            <div class="section-header">
+              <h2>Audit Log</h2>
+            </div>
+            <div id="audit-log" class="stack"></div>
+          </div>
+        </section>
+      </main>
+    </div>
+
+    <template id="message-template">
+      <article class="message">
+        <p class="role"></p>
+        <pre class="content"></pre>
+      </article>
+    </template>
+
+    <script src="/static/app.js" defer></script>
+  </body>
+</html>
