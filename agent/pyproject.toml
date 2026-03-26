@@ -5,6 +5,7 @@ description = "AI agent demo with a dashboard app inspired by the hospital agent
 requires-python = ">=3.11"
 dependencies = [
   "fastapi>=0.115.0",
+  "httpx>=0.27.0",
   "uvicorn>=0.34.0",
 ]
 
